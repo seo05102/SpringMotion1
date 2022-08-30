@@ -1,0 +1,292 @@
+<div id="glowscript" class="glowscript">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<link type="text/css" href="https://www.glowscript.org/css/redmond/2.1/jquery-ui.custom.css" rel="stylesheet" />
+<link type="text/css" href="https://www.glowscript.org/css/ide.css" rel="stylesheet" />
+<script type="text/javascript" src="https://www.glowscript.org/lib/jquery/2.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://www.glowscript.org/lib/jquery/2.1/jquery-ui.custom.min.js"></script>
+<script type="text/javascript" src="https://www.glowscript.org/package/glow.3.2.min.js"></script>
+<script type="text/javascript" src="https://www.glowscript.org/package/RSrun.3.2.min.js"></script>
+<script type="text/javascript"><!--//--><![CDATA[//><!--
+
+// START JAVASCRIPT
+;(function() {;
+var ρσ_modules = {};
+var running, drag, chosenObj, ball, ks, spring, kd;
+ρσ_modules.pythonize = {};
+
+(function(){
+    function strings() {
+        var string_funcs, exclude, name;
+        string_funcs = set("capitalize strip lstrip rstrip islower isupper isspace lower upper swapcase center count endswith startswith find rfind index rindex format join ljust rjust partition rpartition replace split rsplit splitlines zfill".split(" "));
+        if (!arguments.length) {
+            exclude = (function(){
+                var s = ρσ_set();
+                s.jsset.add("split");
+                s.jsset.add("replace");
+                return s;
+            })();
+        } else if (arguments[0]) {
+            exclude = Array.prototype.slice.call(arguments);
+        } else {
+            exclude = null;
+        }
+        if (exclude) {
+            string_funcs = string_funcs.difference(set(exclude));
+        }
+        var ρσ_Iter0 = string_funcs;
+        ρσ_Iter0 = ((typeof ρσ_Iter0[Symbol.iterator] === "function") ? (ρσ_Iter0 instanceof Map ? ρσ_Iter0.keys() : ρσ_Iter0) : Object.keys(ρσ_Iter0));
+        for (var ρσ_Index0 of ρσ_Iter0) {
+            name = ρσ_Index0;
+            (ρσ_expr_temp = String.prototype)[(typeof name === "number" && name < 0) ? ρσ_expr_temp.length + name : name] = (ρσ_expr_temp = ρσ_str.prototype)[(typeof name === "number" && name < 0) ? ρσ_expr_temp.length + name : name];
+        }
+    };
+    if (!strings.__module__) Object.defineProperties(strings, {
+        __module__ : {value: "pythonize"}
+    });
+
+    ρσ_modules.pythonize.strings = strings;
+})();
+async function __main__() {
+"use strict";
+    var display = canvas;
+    var scene = canvas();
+
+    var version, print, arange, __name__, type, ρσ_ls, running, drag, chosenObj, massSlider, stiffnessSlider, dampingSlider, ceiling, ball, spring, g, l0, ks, kd, Fgrav, t, dt, wt_M, wt_K, wt_D, motion_graph, traj, l, s, lhat, Fspr, Fdamp, Fnet;
+    version = ρσ_list_decorate([ "3.2", "glowscript" ]);
+    Array.prototype['+'] = function(r) {return this.concat(r)}
+    Array.prototype['*'] = function(r) {return __array_times_number(this, r)}
+    window.__GSlang = "vpython";
+    print = GSprint;
+    arange = range;
+    __name__ = "__main__";
+    type = pytype;
+    var strings = ρσ_modules.pythonize.strings;
+
+    strings();
+    "4";
+    scene.title = "  Spring Motion Simulator [아래 화면을 클릭하면 시작합니다]\n \n";
+    "7";
+    running = true;
+    "8";
+    async function Run(b) {
+        "9";
+        "10";
+        running = !running;
+        "11";
+        if (running) {
+            b.text = "일시정지";
+        } else {
+            b.text = "실행";
+        }
+    };
+    if (!Run.__argnames__) Object.defineProperties(Run, {
+        __argnames__ : {value: ["b"]},
+        __module__ : {value: null}
+    });
+
+    "14";
+    ρσ_interpolate_kwargs.call(this, button, [ρσ_desugar_kwargs({text: "일시정지", pos: scene.title_anchor, bind: Run})]);
+    "16";
+    drag = false;
+    "17";
+    chosenObj = null;
+    "20";
+    scene.bind("mousedown", down);
+    "21";
+    async function down() {
+        "22";
+        "23";
+        chosenObj = scene.mouse.pick();
+        "24";
+        drag = true;
+    };
+    if (!down.__module__) Object.defineProperties(down, {
+        __module__ : {value: null}
+    });
+
+    "27";
+    scene.bind("mousemove", move);
+    "28";
+    async function move() {
+        "29";
+        "30";
+        if ((drag === true || typeof drag === "object" && ρσ_equals(drag, true))) {
+            "31";
+            if ((chosenObj === ball || typeof chosenObj === "object" && ρσ_equals(chosenObj, ball))) {
+                "32";
+                ball.pos = scene.mouse.pos;
+                "33";
+                spring.axis = ball.pos["-"](1["*"](ceiling.pos));
+            }
+        }
+    };
+    if (!move.__module__) Object.defineProperties(move, {
+        __module__ : {value: null}
+    });
+
+    "36";
+    scene.bind("mouseup", up);
+    "37";
+    async function up() {
+        "38";
+        "39";
+        chosenObj = null;
+        "40";
+        drag = false;
+    };
+    if (!up.__module__) Object.defineProperties(up, {
+        __module__ : {value: null}
+    });
+
+    "43";
+    massSlider = ρσ_interpolate_kwargs.call(this, slider, [ρσ_desugar_kwargs({min: .1, max: 10, value: 1, bind: setMass})]);
+    "44";
+    scene.append_to_caption(" \n 공의 질량(Mass):", massSlider.min, "~", massSlider.max, "\n \n");
+    "46";
+    async function setMass(M) {
+        "47";
+        "48";
+        ball.m = massSlider.value;
+        "49";
+        ball.radius = .025["*"](Math.pow(ball.m, (1["/"](3))));
+        "50";
+        wt_M.text = "{:1.2f}".format(M.value);
+    };
+    if (!setMass.__argnames__) Object.defineProperties(setMass, {
+        __argnames__ : {value: ["M"]},
+        __module__ : {value: null}
+    });
+
+    "53";
+    stiffnessSlider = ρσ_interpolate_kwargs.call(this, slider, [ρσ_desugar_kwargs({min: 50, max: 200, value: 100, bind: setKs})]);
+    "54";
+    scene.append_to_caption(" \n 용수철의 강성계수(Stiffness):", stiffnessSlider.min, "~", stiffnessSlider.max, " \n \n");
+    "56";
+    async function setKs(K) {
+        "57";
+        "58";
+        ks = stiffnessSlider.value;
+        "59";
+        spring.thickness = 3e-5["*"](ks);
+        "60";
+        wt_K.text = "{:1.2f}".format(K.value);
+    };
+    if (!setKs.__argnames__) Object.defineProperties(setKs, {
+        __argnames__ : {value: ["K"]},
+        __module__ : {value: null}
+    });
+
+    "63";
+    dampingSlider = ρσ_interpolate_kwargs.call(this, slider, [ρσ_desugar_kwargs({min: .01, max: 10, value: 1, bind: setDamping})]);
+    "64";
+    scene.append_to_caption(" \n 용수철의 감쇠계수(Damping):", dampingSlider.min, "~", dampingSlider.max, " \n \n");
+    "66";
+    async function setDamping(D) {
+        "67";
+        "68";
+        kd = dampingSlider.value;
+        "69";
+        wt_D.text = "{:1.2f}".format(D.value);
+    };
+    if (!setDamping.__argnames__) Object.defineProperties(setDamping, {
+        __argnames__ : {value: ["D"]},
+        __module__ : {value: null}
+    });
+
+    "74";
+    ceiling = ρσ_interpolate_kwargs.call(this, box, [ρσ_desugar_kwargs({size: vector(.3, .01, .3), color: color.red})]);
+    "75";
+    ball = ρσ_interpolate_kwargs.call(this, sphere, [ρσ_desugar_kwargs({pos: vector(0, 1["-u"]()["*"](.3), 0), radius: .03, texture: textures.metal, make_trail: true, trail_color: color.black, retain: 50, color: color.blue})]);
+    "76";
+    spring = ρσ_interpolate_kwargs.call(this, helix, [ρσ_desugar_kwargs({pos: ceiling.pos, axis: ball.pos["-"](1["*"](ceiling.pos)), color: color.black, thickness: .003, coils: 30, radius: .01, color: color.green})]);
+    "79";
+    g = 9.8;
+    "80";
+    ball.m = 1;
+    "81";
+    l0 = .3;
+    "82";
+    ks = 100;
+    "83";
+    kd = 1;
+    "84";
+    ball.v = vector(0, 0, 0);
+    "85";
+    Fgrav = ball.m["*"](g)["*"](vector(0, 1["-u"]()["*"](1), 0));
+    "88";
+    t = 0;
+    "89";
+    dt = .001;
+    "92";
+    scene.background = color.white;
+    "93";
+    scene.autoscale = false;
+    "94";
+    scene.center = vector(0, 1["-u"]()["*"](l0), 0);
+    "97";
+    scene.append_to_caption(" 질량: ");
+    "98";
+    wt_M = ρσ_interpolate_kwargs.call(this, wtext, [ρσ_desugar_kwargs({text: "{:1.2f}".format(massSlider.value)})]);
+    "99";
+    scene.append_to_caption("   강성계수: ");
+    "100";
+    wt_K = ρσ_interpolate_kwargs.call(this, wtext, [ρσ_desugar_kwargs({text: "{:1.2f}".format(stiffnessSlider.value)})]);
+    "101";
+    scene.append_to_caption("   감쇠계수: ");
+    "102";
+    wt_D = ρσ_interpolate_kwargs.call(this, wtext, [ρσ_desugar_kwargs({text: "{:1.2f}".format(dampingSlider.value)})]);
+    "103";
+    scene.append_to_caption("\n \n");
+    "106";
+    motion_graph = ρσ_interpolate_kwargs.call(this, graph, [ρσ_desugar_kwargs({title: "시간에 대한 용수철 길이의 변화", xtitle: "시간", ytitle: "용수철 길이"})]);
+    "107";
+    traj = ρσ_interpolate_kwargs.call(this, gcurve, [ρσ_desugar_kwargs({color: color.red})]);
+    "110";
+    (await scene.waitfor("click"));
+    "113";
+    while (true) {
+        "114";
+        (await rate(1["/"](dt)));
+        "115";
+        if (running) {
+            "117";
+            l = mag(ball.pos["-"](1["*"](ceiling.pos)));
+            "118";
+            s = l["-"](1["*"](l0));
+            "119";
+            lhat = norm(ball.pos);
+            "120";
+            Fspr = 1["-u"]()["*"](ks)["*"](s)["*"](lhat);
+            "123";
+            Fdamp = 1["-u"]()["*"](kd)["*"](dot(ball.v, lhat))["*"](lhat);
+            "126";
+            Fnet = Fgrav["+"](Fspr)["+"](Fdamp);
+            "128";
+            if ((drag === true || typeof drag === "object" && ρσ_equals(drag, true))) {
+                "129";
+                Fnet = vec(0, 0, 0);
+                "130";
+                ball.v = vec(0, 0, 0);
+            }
+            "133";
+            ball.v = ball.v["+"](Fnet["/"](ball.m)["*"](dt));
+            "134";
+            ball.pos = ball.pos["+"](ball.v["*"](dt));
+            "137";
+            spring.axis = ball.pos["-"](1["*"](ceiling.pos));
+            "140";
+            t = t["+"](dt);
+            "143";
+            ρσ_interpolate_kwargs.call(traj, traj.plot, [ρσ_desugar_kwargs({pos: [t, l]})]);
+        }
+    }
+};
+if (!__main__.__module__) Object.defineProperties(__main__, {
+    __module__ : {value: null}
+});
+
+;$(function(){ window.__context = { glowscript_container: $("#glowscript").removeAttr("id") }; __main__() })})()
+// END JAVASCRIPT
+
+//--><!]]></script>
+</div>
